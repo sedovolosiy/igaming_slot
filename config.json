@@ -1,0 +1,15 @@
+{
+  "reels": [
+    ["APPLE", "BANANA", "PLUM", "7", "BAR", "STAR", "7", "BAR", "APPLE", "PLUM", "BANANA", "7", "BAR", "STAR", "7", "BAR", "APPLE", "PLUM"],
+    ["BANANA", "PLUM", "7", "BAR", "STAR", "WILD", "7", "BAR", "APPLE", "PLUM", "BANANA", "7", "BAR", "STAR", "WILD", "7", "BAR", "APPLE", "PLUM", "BANANA"],
+    ["PLUM", "7", "BAR", "STAR", "WILD", "7", "BAR", "APPLE", "PLUM", "BANANA", "7", "BAR", "STAR", "WILD", "7", "BAR", "APPLE", "PLUM", "BANANA", "7"]
+  ],
+  "paytable": {
+    "BANANA": [0,0,1],
+    "APPLE": [0,0,2],
+    "PLUM": [0,0,3],
+    "BAR": [0,0,10],
+    "STAR": [0,0,20],
+    "7": [0,10,100]
+  }
+}

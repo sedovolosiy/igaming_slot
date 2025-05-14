@@ -1,0 +1,84 @@
+# See https://github.com/github/gitignore/blob/main/Ruby.gitignore for details
+
+# Ignore bundler config
+/.bundle
+
+# Ignore the default SQLite database.
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/tmp
+
+# Ignore pid files, cache, and other temp files
+*.pid
+*.pid.lock
+/tmp/
+
+# Ignore Byebug command history file.
+.byebug_history
+
+# Ignore dotenv environment variable files
+.env
+.env.*
+
+# Ignore node modules (if using webpacker or js bundling)
+/node_modules
+
+# Ignore yarn files
+/yarn-error.log
+
+# Ignore coverage reports
+/coverage/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore RubyMine project files
+.idea/
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore rbenv and rvm settings
+.rbenv-version
+.ruby-version
+.ruby-gemset
+
+# Ignore gems
+/vendor/bundle
+
+# Ignore documentation
+/doc/
+
+# Ignore test and spec temp files
+/spec/tmp
+/spec/examples.txt
+
+# Ignore Capybara screenshots
+/tmp/capybara
+
+# Ignore public assets (if precompiled)
+/public/assets
+/public/packs
+/public/packs-test
+
+# Ignore Sprockets cache
+/tmp/cache/assets/sprockets
+
+# Ignore Spring files
+/tmp/spring
+
+# Ignore Pry history
+.pry_history
+
+# Ignore IRB history
+.irb-history
+
+# Ignore SimpleCov coverage
+/.resultset.json
+
+# Ignore gemspec
+*.gem
