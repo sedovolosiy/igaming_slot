@@ -99,7 +99,15 @@ post '/spin' do
   session[:win] = win
   session[:screen] = screen
   session[:screen_rows] = game.screen_rows(screen)
-  session[:win_paths] = win_paths
+  
+  # Преобразуем пути в формат для отображения
+  winning_cells = []
+  win_paths.each do |path|
+    path[:coords].each do |row, col|
+      winning_cells << [row, col, path[:symbol], path[:payout]]
+    end
+  end
+  session[:winning_cells] = winning_cells
   # Сохраняем историю только после успешного спина
   pdata[:history] ||= []
   pdata[:history] << {

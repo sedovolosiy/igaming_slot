@@ -2,56 +2,288 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Slot Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: Arial, sans-serif; background: #222; color: #eee; }
-    .container { max-width: 500px; margin: 40px auto; background: #333; padding: 24px; border-radius: 10px; }
-    input[type=number] { width: 80px; }
-    .screen { font-family: monospace; background: #111; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
-    .win { color: #0f0; font-weight: bold; }
-    .error { color: #f55; }
-    .valid { color: #0f0; }
-    .balance { color: #ff0; }
+    html, body { 
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 20px 0 !important;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-container { 
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 100%;
+      min-width: 320px;
+      margin: 32px auto;
+      padding: 1.2rem 1.2rem 1.5rem 1.2rem !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @media (min-width: 900px) {
+      .game-container {
+        max-width: 900px;
+      }
+    }
+    .slot-machine {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2rem;
+      border-radius: 15px;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 15px;
+      aspect-ratio: 1;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .slot-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      font-size: 3.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+    .slot-cell::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: translateY(-100%);
+      transition: transform 0.3s;
+    }
+    .slot-cell:hover::before {
+      transform: translateY(100%);
+    }
+    .slot-cell.highlight {
+      animation: pulse 1s infinite;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .slot-symbol {
+      position: relative;
+      z-index: 1;
+    }
+    .symbol-BANANA { color: #ffd700; }
+    .symbol-APPLE { color: #ff6b6b; }
+    .symbol-PLUM { color: #9775fa; }
+    .symbol-BAR { color: #15aabf; }
+    .symbol-STAR { color: #ffd43b; }
+    .symbol-7 { color: #ff0000; }
+    .symbol-WILD { 
+      color: #ff00ff; 
+      text-shadow: 0 0 10px #ff00ff;
+      animation: rainbow 3s linear infinite;
+    }
+    @keyframes rainbow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+    .win { 
+      color: #00ff95;
+      font-weight: bold;
+      font-size: 2rem;
+      text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+      margin: 1rem 0;
+    }
+    .error { 
+      color: #ff5555; 
+      font-size: 1.2rem;
+    }
+    .valid { 
+      color: #00ff95;
+      text-shadow: 0 0 10px rgba(0, 255, 149, 0.3);
+      font-size: 1.2rem;
+    }
+    .balance { 
+      color: #ffd700;
+      font-size: 2rem;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      margin: 1rem 0;
+    }
+    .btn-spin {
+      background: linear-gradient(45deg, #ff4e50, #f9d423);
+      border: none;
+      font-size: 2rem;
+      padding: 1rem 3rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      margin: 1rem 0;
+    }
+    .btn-spin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 78, 80, 0.4);
+    }
+    .input-group-text {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #eee;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .form-control {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #eee;
+    }
+    .form-control:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #eee;
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Slot Game</h2>
-    <div class="balance">Balance: <b><%= @balance.round(2) %></b></div>
-    <% if @require_deposit %>
-      <div class="error">Balance is zero. Please deposit funds to start playing.</div>
-    <% end %>
-    <form action="/set_bet" method="post" style="margin-bottom:10px;">
-      Bet: <input type="number" name="bet" min="0.01" step="0.01" value="<%= @bet %>" <%= @require_deposit ? 'disabled' : '' %>>
-      <button type="submit" <%= @require_deposit ? 'disabled' : '' %>>Set Bet</button>
-    </form>
-    <form action="/deposit" method="post" style="margin-bottom:10px;">
-      Deposit: <input type="number" name="amount" min="0.01" step="0.01">
-      <button type="submit">Deposit</button>
-    </form>
-    <form action="/spin" method="post">
-      <button type="submit" style="font-size:1.2em;" <%= @require_deposit ? 'disabled' : '' %>>Spin</button>
-    </form>
-    <% if @message %>
-      <%= @message %>
-    <% end %>
-    <% if @screen_rows %>
-      <div class="screen">
-        <% @screen_rows.each do |row| %>
-          <div><%= row.join(' ') %></div>
-        <% end %>
+    <div class="row justify-content-center h-100">
+      <div class="col-12">
+        <div class="game-container">
+          <h2 class="text-center mb-2" style="font-size: 2.5rem;">🎰 Slot Game</h2>
+          
+          <div class="balance text-center mb-2">
+            Balance: <b><%= @balance.round(2) %></b>
+          </div>
+
+          <% if @require_deposit %>
+            <div class="alert alert-danger">
+              Balance is zero. Please deposit funds to start playing.
+            </div>
+          <% end %>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <form action="/set_bet" method="post">
+                <div class="input-group">
+                  <span class="input-group-text">Bet</span>
+                  <input type="number" class="form-control" name="bet" min="0.01" step="0.01" value="<%= @bet %>" <%= @require_deposit ? 'disabled' : '' %>>
+                  <button class="btn btn-outline-light" type="submit" <%= @require_deposit ? 'disabled' : '' %>>Set</button>
+                </div>
+              </form>
+            </div>
+            <div class="col-sm-6">
+              <form action="/deposit" method="post">
+                <div class="input-group">
+                  <span class="input-group-text">Add</span>
+                  <input type="number" class="form-control" name="amount" min="0.01" step="0.01" placeholder="Amount">
+                  <button class="btn btn-outline-light" type="submit">Deposit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <form action="/spin" method="post" class="text-center mb-4">
+            <button type="submit" class="btn btn-spin btn-lg" <%= @require_deposit ? 'disabled' : '' %>>
+              Spin
+            </button>
+          </form>
+          <% if @message %>
+            <%= @message %>
+          <% end %>
+
+          <% if @screen_rows %>
+            <div class="slot-machine">
+              <div class="slot-grid">
+                <% @screen_rows.each do |row| %>
+                  <% row.each do |symbol| %>
+                    <% 
+                      is_winning = false
+                      if session[:winning_cells]
+                        session[:winning_cells].each do |row_idx, col_idx, win_symbol, payout|
+                          if row_idx == @screen_rows.index(row) && col_idx == row.index(symbol)
+                            is_winning = true
+                            break
+                          end
+                        end
+                      end
+                    %>
+                    <div class="slot-cell <%= 'highlight' if is_winning %>">
+                      <div class="slot-symbol symbol-<%= symbol %>">
+                        <% case symbol %>
+                        <% when 'BANANA' %>
+                          <i class="fas fa-banana" title="Banana">🍌</i>
+                        <% when 'APPLE' %>
+                          <i class="fas fa-apple-alt" title="Apple">🍎</i>
+                        <% when 'PLUM' %>
+                          <i class="fas fa-plum" title="Plum">🍇</i>
+                        <% when 'BAR' %>
+                          <i class="fas fa-cocktail" title="Bar">🍸</i>
+                        <% when 'STAR' %>
+                          <i class="fas fa-star" title="Star">⭐</i>
+                        <% when '7' %>
+                          <i class="fas fa-7" title="Seven">7️⃣</i>
+                        <% when 'WILD' %>
+                          <i class="fas fa-joker" title="Wild">🃏</i>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <% if @win %>
+            <div class="win text-center mb-4">
+              🎉 Win: <%= @win.round(2) %>
+            </div>
+          <% end %>
+
+          <% if player_data[:history] && player_data[:history].any? %>
+            <form action="/verify" method="post" class="mt-4">
+              <div class="input-group">
+                <span class="input-group-text">Verify spin</span>
+                <input type="number" class="form-control" name="spin_index" min="0" 
+                       max="<%= player_data[:history].size - 1 %>" value="0" 
+                       placeholder="0 = last, 1 = previous...">
+                <button class="btn btn-outline-light" type="submit">
+                  Verify
+                </button>
+              </div>
+            </form>
+          <% end %>
+        </div>
       </div>
-    <% end %>
-    <% if @win %>
-      <div class="win">Win: <%= @win.round(2) %></div>
-    <% end %>
-    <% if player_data[:history] && player_data[:history].any? %>
-      <form action="/verify" method="post" style="margin-top:10px;">
-        <label>Verify spin (0 = last, 1 = previous, ...):</label>
-        <input type="number" name="spin_index" min="0" max="<%= player_data[:history].size - 1 %>" value="0">
-        <button type="submit">Verify Game</button>
-      </form>
-    <% end %>
+    </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
