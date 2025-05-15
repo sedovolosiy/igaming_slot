@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slot Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #222; color: #eee; }
+    .container { max-width: 500px; margin: 40px auto; background: #333; padding: 24px; border-radius: 10px; }
+    input[type=number] { width: 80px; }
+    .screen { font-family: monospace; background: #111; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+    .win { color: #0f0; font-weight: bold; }
+    .error { color: #f55; }
+    .balance { color: #ff0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Slot Game</h2>
+    <div class="balance">Balance: <b><%= @balance.round(2) %></b></div>
+    <form action="/set_bet" method="post" style="margin-bottom:10px;">
+      Bet: <input type="number" name="bet" min="0.01" step="0.01" value="<%= @bet %>">
+      <button type="submit">Set Bet</button>
+    </form>
+    <form action="/deposit" method="post" style="margin-bottom:10px;">
+      Deposit: <input type="number" name="amount" min="0.01" step="0.01">
+      <button type="submit">Deposit</button>
+    </form>
+    <form action="/spin" method="post">
+      <button type="submit" style="font-size:1.2em;">Spin</button>
+    </form>
+    <% if @message %>
+      <div class="error"><%= @message %></div>
+    <% end %>
+    <% if @screen_rows %>
+      <div class="screen">
+        <% @screen_rows.each do |row| %>
+          <div><%= row.join(' ') %></div>
+        <% end %>
+      </div>
+    <% end %>
+    <% if @win %>
+      <div class="win">Win: <%= @win.round(2) %></div>
+    <% end %>
+  </div>
+</body>
+</html>
