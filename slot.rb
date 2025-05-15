@@ -1,16 +1,20 @@
 # frozen_string_literal: true
 require 'json'
 require 'set'
+require 'digest'
+require 'securerandom'
 
 class SlotGame
-  attr_reader :reels, :paytable, :rows, :cols
+  attr_reader :reels, :paytable, :rows, :cols, :server_seed, :server_seed_hash
 
-  def initialize(config_path = 'config.json')
+  def initialize(config_path = 'config.json', server_seed = nil)
     config = JSON.parse(File.read(config_path))
     @reels     = config['reels']
     @paytable  = config['paytable']
     @cols      = reels.size
     @rows      = 3
+    @server_seed = server_seed || SecureRandom.hex(32)
+    @server_seed_hash = Digest::SHA256.hexdigest(@server_seed)
   end
 
   # Returns a 2D array of rows×cols representing the screen symbols.
@@ -22,6 +26,28 @@ class SlotGame
       Array.new(rows) { |i| reel[(idx + i) % reel.size] }
     end
     columns
+  end
+
+  # Provably fair spin: deterministic based on seeds and nonce
+  def provably_fair_spin(client_seed, nonce)
+    columns = reels.each_with_index.map do |reel, reel_idx|
+      hash_input = "#{@server_seed}:#{client_seed}:#{nonce}:#{reel_idx}"
+      hash = Digest::SHA512.hexdigest(hash_input)
+      idx = hash.to_i(16) % reel.size
+      Array.new(rows) { |i| reel[(idx + i) % reel.size] }
+    end
+    columns
+  end
+
+  # Verifies a spin result
+  def verify_spin(server_seed, client_seed, nonce, expected_screen)
+    columns = reels.each_with_index.map do |reel, reel_idx|
+      hash_input = "#{server_seed}:#{client_seed}:#{nonce}:#{reel_idx}"
+      hash = Digest::SHA512.hexdigest(hash_input)
+      idx = hash.to_i(16) % reel.size
+      Array.new(rows) { |i| reel[(idx + i) % reel.size] }
+    end
+    columns == expected_screen
   end
 
   # Returns the screen as rows for visualization (transpose)
