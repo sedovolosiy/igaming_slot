@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'json'
+require 'set'
 
 class SlotGame
   attr_reader :reels, :paytable, :rows, :cols
@@ -20,68 +21,104 @@ class SlotGame
       # Select three consecutive symbols (with wrapping)
       Array.new(rows) { |i| reel[(idx + i) % reel.size] }
     end
-    
-    # Convert to rows format for consistency with the rest of the code
-    columns.transpose
+    # Возвращаем массив КОЛОНОК (без transpose) — для расчёта выигрыша
+    columns
+    # [["BAR", "APPLE", "PLUM"], ["BANANA", "7", "BAR"], ["7", "BAR", "APPLE"]]
+    # [["APPLE", "BANANA", "PLUM"], ["WILD", "7", "BAR"], ["BAR", "STAR", "WILD"]]
+    # [["PLUM", "7", "BAR"], ["7", "BAR", "APPLE"], ["PLUM", "BANANA", "7"]]
   end
 
-  # Calculates the payout for a single screen given the bet amount.
-  # For each symbol, only the maximum length of ways is considered.
-  def calculate_win(screen, bet_amount)
-    total_win = 0.0
-    
-    paytable.each_key do |sym|
-      ways, length = ways_and_length_for(screen, sym)
-      # If there are no ways or the length is less than 2, skip
-      next if ways.zero? || length < 2
-      
-      # Расчет выплаты только для максимальной длины пути для символа
-      multiplier = paytable[sym][length - 1] || 0
-      total_win += ways * multiplier * bet_amount
-    end
+  # Возвращает screen в виде строк для визуализации (transpose)
+  def screen_rows(screen)
+    screen.transpose
+  end
 
+  # Parallel simple calculation of win using column counts
+  def calculate_win_simple(screen, bet_amount)
+    total_win = 0.0
+    # For each symbol, multiply column counts for every payout length
+    paytable.each do |sym, payouts|
+      # counts of (symbol or WILD) in each column
+      counts = screen.map { |col| col.count(sym) + col.count('WILD') }
+      payouts.each_with_index do |payout, idx|
+        length = idx + 1
+        # only lengths >=2, within column size, and positive payout
+        next if length < 2 || length > counts.size || payout.to_i <= 0
+        ways = counts.take(length).reduce(1, :*)
+        total_win += ways * payout * bet_amount
+      end
+    end
     total_win
   end
 
-  # For the given symbol, returns [ways, length]:
-  # - ways: the number of ways for the maximum continuous length from the first column.
-  # - length: the maximum continuous length of such a way (1..cols).
-  # Logic: According to README.md, ways are calculated by multiplying the number of
-  # matching symbols (or WILD) in each adjacent column, starting from the left.
-  def ways_and_length_for(screen, sym)
+  # Возвращает массив путей (каждый путь — массив координат) для символа sym и длины length
+  # Путь всегда начинается с первого столбца и идёт подряд вправо
+  def ways_paths_for_length(screen, sym, length)
+    rows = screen.size
     cols = screen[0].size
-    symbol_counts_in_cols = []
-
-    # Iterate through columns from left to right
-    cols.times do |col_idx|
-      # Count occurrences of the target symbol and WILDs in the current column
-      # A screen is an array of rows. To get a column, we iterate through rows.
-      matches_in_col = 0
-      screen.each do |row|
-        matches_in_col += 1 if row[col_idx] == sym || row[col_idx] == 'WILD'
-      end
-
-      # If no matching symbols (or WILDs) are found in the current column, the way is broken
-      break if matches_in_col.zero?
-
-      symbol_counts_in_cols << matches_in_col
+    return [] if length > cols
+    return [] unless length == 2 || length == 3 # только для 2 и 3 подряд
+    start_positions = []
+    rows.times do |row|
+      start_positions << [[row, 0]] if screen[row][0] == sym || screen[row][0] == 'WILD'
     end
+    paths = []
+    queue = start_positions.dup
+    until queue.empty?
+      path = queue.shift
+      col = path.last[1]
+      if path.size == length
+        paths << path
+        next
+      end
+      next_col = col + 1
+      next if next_col >= cols
+      rows.times do |row|
+        if screen[row][next_col] == sym || screen[row][next_col] == 'WILD'
+          queue << (path + [[row, next_col]])
+        end
+      end
+    end
+    paths.map { |p| p.map(&:dup) }
+  end
 
-    # If no columns with matching symbols were found
-    return [0, 0] if symbol_counts_in_cols.empty?
-
-    # Calculate the number of ways and the length of the way
-    ways = symbol_counts_in_cols.reduce(1, :*) # Start with 1 for multiplication
-    length = symbol_counts_in_cols.size
-
-    [ways, length]
+  # Возвращает количество ways для символа sym и длины length
+  def ways_for_length(screen, sym, length)
+    rows = screen.size
+    cols = screen[0].size
+    return 0 if length > cols
+    # Для каждой стартовой позиции в первом столбце
+    start_positions = []
+    rows.times do |row|
+      start_positions << [row, 0] if screen[row][0] == sym || screen[row][0] == 'WILD'
+    end
+    count = 0
+    queue = start_positions.map { |pos| [pos] }
+    until queue.empty?
+      path = queue.shift
+      col = path.last[1]
+      if path.size == length
+        count += 1
+        next
+      end
+      next_col = col + 1
+      next if next_col >= cols
+      rows.times do |row|
+        if screen[row][next_col] == sym || screen[row][next_col] == 'WILD'
+          queue << (path + [[row, next_col]])
+        end
+      end
+    end
+    count
   end
 
   # Returns an array of winning paths: [{symbol:, coords: [[row, col], ...]}]
   def winning_paths(screen)
     paths = []
+    # Convert columns to row-major matrix
+    matrix = screen.transpose
     paytable.each_key do |sym|
-      ways, length, all_paths = ways_and_length_with_coords(screen, sym)
+      ways, length, all_paths = ways_and_length_with_coords(matrix, sym)
       next if ways.zero? || length < 2
       payout = paytable[sym][length - 1] || 0
       next if payout <= 0

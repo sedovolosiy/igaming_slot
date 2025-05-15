@@ -21,9 +21,11 @@ class VisualPrinter
     rows = screen.size
     cols = screen[0].size
     # For quick lookup: { [row, col] => {symbol, color} }
+    # Only consider paths with positive payout
+    winning = win_paths.select { |p| p[:payout] && p[:payout] > 0 }
     highlight = {}
     color_map = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
-    win_paths.each_with_index do |path, idx|
+    winning.each_with_index do |path, idx|
       color = color_map[idx % color_map.size]
       path[:coords].each { |rc| highlight[rc] = {symbol: path[:symbol], color: color} }
     end
@@ -43,7 +45,7 @@ class VisualPrinter
       puts line.join('   ')
     end
     puts
-    win_paths.each_with_index do |path, idx|
+    winning.each_with_index do |path, idx|
       color = color_map[idx % color_map.size]
       coords_str = path[:coords].map { |r, c| "(#{r+1},#{c+1})" }.join(' → ')
       puts "#{color}Path #{idx+1}: #{path[:symbol]} #{coords_str} (length: #{path[:length]}, payout: #{path[:payout]})#{RESET}"
