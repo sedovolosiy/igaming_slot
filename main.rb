@@ -1,25 +1,19 @@
 # frozen_string_literal: true
 require_relative 'slot'
 require_relative 'visual_printer'
-require_relative 'screen_printer'
 
 GAME = SlotGame.new
 BET  = 1.0
 
 # Single spin with output
 screen = GAME.spin
-# puts "\n=== Original screen ==="
-# print screen
-
-# puts "\n=== Screen printer ==="
-# ScreenPrinter.call(screen)
 
 # puts "\n=== Single spin ==="
 # Visualization with highlighting of winning paths
 win_paths = GAME.winning_paths(screen)
 VisualPrinter.call(GAME.screen_rows(screen), win_paths)
 
-simple_win = GAME.calculate_win_simple(screen, BET)
+simple_win = GAME.calculate_win(screen, BET)
 puts "Simple win: #{simple_win.round(2)}\n\n"
 
 # RTP simulation for 1,000,000 rounds
@@ -29,7 +23,7 @@ puts "Simple win: #{simple_win.round(2)}\n\n"
 
 # rounds.times do
 #   s = GAME.spin
-#   total_win += GAME.calculate_win_simple(s, BET)
+#   total_win += GAME.calculate_win(s, BET)
 # end
 
 # rtp = (total_win / total_bet) * 100

@@ -12,7 +12,7 @@ RSpec.describe SlotGame do
         ['PLUM', 'BAR', 'BANANA'],
         ['BANANA', 'WILD', 'PLUM']
       ]
-      win = game.calculate_win_simple(screen, 1.0)
+      win = game.calculate_win(screen, 1.0)
       expect(win).to eq(0)
     end
 
@@ -22,7 +22,7 @@ RSpec.describe SlotGame do
         ['PLUM', 'PLUM', 'BANANA'],
         ['BANANA', 'WILD', 'PLUM']
       ]
-      win = game.calculate_win_simple(screen, 1.0)
+      win = game.calculate_win(screen, 1.0)
       expect(win).to eq(26.0)
     end
 
@@ -33,7 +33,7 @@ RSpec.describe SlotGame do
         ["7", "PLUM", "BANANA"]
       ]
 
-      win = game.calculate_win_simple(screen, 1.0)
+      win = game.calculate_win(screen, 1.0)
 
       expect(win).to eq(660.0)
     end

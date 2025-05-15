@@ -1,18 +1,11 @@
-# Slots Team Live Coding Test Task
+# Simple Slot Game
 
-## Task
-Write a simple slot game according to the requirements below.
+This project implements a simple slot game with basic functionality, including generating a 3x3 screen, supporting wild symbols, calculating wins using "ways," and determining the Return to Player (RTP) percentage over 1,000,000 simulated rounds.
 
-## Requirements
-- 3x3 screen
-- Generate screen from reels
-- Wild symbol support
-- Win by ways
-- Pays by the paytable
-- Count RTP of the game (on 1,000,000 rounds)
+## Features
 
-## Reels
-Reels are used for generating screens, usually represented as arrays of symbols. For this task, use the following reels:
+### Reels
+Reels are used to generate the slot screen. Each reel is represented as an array of symbols. The reels used in this project are as follows:
 
 ```
 [
@@ -22,18 +15,13 @@ Reels are used for generating screens, usually represented as arrays of symbols.
 ]
 ```
 
-### Output Example
-```
-| APPLE  | BANANA | APPLE  |
-| APPLE  | PLUM   | BANANA |
-| BANANA | WILD   | PLUM   |
-```
+### Wild Symbol
+The Wild symbol acts as a Joker in Poker and can substitute for any other symbol in the game to form winning combinations.
 
-## Wild Symbol
-The Wild symbol acts as a Joker in Poker and can substitute for any symbol in the game.
-
-## Ways
-Ways are used for detecting win combinations. Unlike classic lines, ways do not have exact coordinates to match. To build ways, ensure that adjacent columns contain the same symbols (or wilds) as the way started. Multiply the counts of matching symbols in each column to get the total number of ways.
+### Ways
+The game uses "ways" to detect winning combinations. Unlike traditional paylines, ways do not have fixed coordinates. To calculate ways:
+- Ensure adjacent columns contain the same symbols (or wilds) as the starting symbol.
+- Multiply the counts of matching symbols in each column to get the total number of ways.
 
 #### Example 1: APPLE Symbol
 ```
@@ -57,15 +45,14 @@ Ways are used for detecting win combinations. Unlike classic lines, ways do not 
 - 3rd column: 1 BANANA
 - Ways: 1 x 2 x 1 = 2
 
-## Paytable
-The paytable is a hash with the following schema:
+### Paytable
+The paytable defines the payouts for each symbol. A way must start from the 1st column and be continuous to qualify for a payout. The paytable schema is as follows:
 
 ```
 { "SYMBOL": [0, 0, payout_for_3] }
 ```
-Leading zeros are for 1 & 2 continuous length of way. To be paid, a way should start from the 1st column and be continuous.
 
-### Test Paytable
+#### Example Paytable
 ```
 {
     "BANANA": [0, 0, 1],
@@ -77,15 +64,23 @@ Leading zeros are for 1 & 2 continuous length of way. To be paid, a way should s
 }
 ```
 
-## RTP
-RTP (Return To Player) is a metric that tells how much the game theoretically returns to players. For example, with 100,000 players making 100,000 bets each (10,000,000,000 rounds), practical and theoretical RTPs are nearly the same.
-
-To calculate practical RTP:
+### RTP Calculation
+Return to Player (RTP) is a metric that indicates the theoretical percentage of bets returned to players over time. The RTP is calculated as follows:
 
 ```
 RTP = (sum of all wins) / (sum of all bets)
 ```
 
----
+In this project, the RTP is calculated over 1,000,000 simulated rounds.
 
-> **Note:** Implement the slot game logic, simulate 1,000,000 rounds, and calculate the RTP as described above.
+## Example Output
+```
+| APPLE  | BANANA | APPLE  |
+| APPLE  | PLUM   | BANANA |
+| BANANA | WILD   | PLUM   |
+```
+
+## How to Run
+1. Clone the repository.
+2. Ensure you have Ruby installed.
+3. Run the main script to simulate the game and calculate the RTP.

@@ -21,20 +21,16 @@ class SlotGame
       # Select three consecutive symbols (with wrapping)
       Array.new(rows) { |i| reel[(idx + i) % reel.size] }
     end
-    # Возвращаем массив КОЛОНОК (без transpose) — для расчёта выигрыша
     columns
-    # [["BAR", "APPLE", "PLUM"], ["BANANA", "7", "BAR"], ["7", "BAR", "APPLE"]]
-    # [["APPLE", "BANANA", "PLUM"], ["WILD", "7", "BAR"], ["BAR", "STAR", "WILD"]]
-    # [["PLUM", "7", "BAR"], ["7", "BAR", "APPLE"], ["PLUM", "BANANA", "7"]]
   end
 
-  # Возвращает screen в виде строк для визуализации (transpose)
+  # Returns the screen as rows for visualization (transpose)
   def screen_rows(screen)
     screen.transpose
   end
 
   # Parallel simple calculation of win using column counts
-  def calculate_win_simple(screen, bet_amount)
+  def calculate_win(screen, bet_amount)
     total_win = 0.0
     # For each symbol, multiply column counts for every payout length
     paytable.each do |sym, payouts|
@@ -51,13 +47,13 @@ class SlotGame
     total_win
   end
 
-  # Возвращает массив путей (каждый путь — массив координат) для символа sym и длины length
-  # Путь всегда начинается с первого столбца и идёт подряд вправо
+  # Returns an array of paths (each path is an array of coordinates) for symbol sym and length
+  # The path always starts from the first column and goes consecutively to the right
   def ways_paths_for_length(screen, sym, length)
     rows = screen.size
     cols = screen[0].size
     return [] if length > cols
-    return [] unless length == 2 || length == 3 # только для 2 и 3 подряд
+    return [] unless length == 2 || length == 3 # only for 2 and 3 in a row
     start_positions = []
     rows.times do |row|
       start_positions << [[row, 0]] if screen[row][0] == sym || screen[row][0] == 'WILD'
@@ -82,12 +78,12 @@ class SlotGame
     paths.map { |p| p.map(&:dup) }
   end
 
-  # Возвращает количество ways для символа sym и длины length
+  # Returns the number of ways for symbol sym and length
   def ways_for_length(screen, sym, length)
     rows = screen.size
     cols = screen[0].size
     return 0 if length > cols
-    # Для каждой стартовой позиции в первом столбце
+    # For each starting position in the first column
     start_positions = []
     rows.times do |row|
       start_positions << [row, 0] if screen[row][0] == sym || screen[row][0] == 'WILD'
