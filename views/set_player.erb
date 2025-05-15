@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Set Player</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #222; color: #eee; }
+    .container { max-width: 400px; margin: 40px auto; background: #333; padding: 24px; border-radius: 10px; }
+    input[type=text] { width: 90%; padding: 6px; margin-bottom: 10px; }
+    .error { color: #f55; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Enter Player Info</h2>
+    <% if @error %>
+      <div class="error"><%= @error %></div>
+    <% end %>
+    <form action="/set_player" method="post">
+      <label>Player Name:</label><br>
+      <input type="text" name="player_name" required><br>
+      <label>Unique Salt (any string):</label><br>
+      <input type="text" name="salt" required><br>
+      <button type="submit">Start</button>
+    </form>
+  </div>
+</body>
+</html>
