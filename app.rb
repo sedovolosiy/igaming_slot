@@ -29,7 +29,7 @@ post '/set_bet' do
   if bet > 0 && bet <= session[:balance]
     session[:bet] = bet
   else
-    session[:message] = 'Ставка должна быть положительной и не больше баланса!'
+    session[:message] = 'Bet must be positive and not greater than balance!'
   end
   redirect to('/'), 303
 end
@@ -39,7 +39,7 @@ post '/deposit' do
   if amount > 0
     session[:balance] += amount
   else
-    session[:message] = 'Сумма пополнения должна быть положительной!'
+    session[:message] = 'Deposit amount must be positive!'
   end
   redirect to('/'), 303
 end
@@ -48,7 +48,7 @@ post '/spin' do
   bet = session[:bet]
   balance = session[:balance]
   if bet > balance
-    session[:message] = 'Недостаточно средств для ставки!'
+    session[:message] = 'Not enough funds for the bet!'
     redirect to('/'), 303
   end
   screen = game.spin

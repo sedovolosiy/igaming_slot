@@ -1,8 +1,0 @@
-{
-  "name": "Ruby Slot Game",
-  "image": "mcr.microsoft.com/devcontainers/ruby:3.4.3",
-  "features": {
-    "ghcr.io/devcontainers/features/ruby:1": {}
-  },
-  "postCreateCommand": "bundle install || true"
-}
