@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://127.0.0.1:4567/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slot Game</title>
+  
+<link href="./index_files/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./index_files/all.min.css">
+  <style>
+    html, body {
+      height: 100vh; 
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      overflow: hidden; 
+      font-size: 14px; 
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center; 
+    }
+
+    .game-wrapper { 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 1vh 1vw; 
+        box-sizing: border-box;
+    }
+
+    .game-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 420px; /* Немного уменьшил для компактности */
+      height: auto; 
+      max-height: 98vh; 
+      /* Уменьшаем padding и делаем его адаптивным */
+      padding: clamp(0.5rem, 1.5vh, 0.8rem); 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Центрируем контент, если есть свободное место, вместо растягивания */
+      justify-content: center; 
+      overflow-y: auto; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    @media (min-width: 700px) and (min-height: 600px) {
+        .game-container {
+            max-width: 500px; 
+            padding: clamp(0.8rem, 2vh, 1rem);
+        }
+    }
+     @media (min-width: 900px) and (min-height: 700px) {
+        .game-container {
+            max-width: 550px;
+        }
+    }
+
+    .game-header h2 {
+      font-size: clamp(1.4rem, 3.5vw, 2rem); 
+      margin-bottom: 0.3rem; /* Уменьшен отступ */
+      text-align: center;
+    }
+
+    .balance, .win {
+      font-size: clamp(0.9rem, 2.8vw, 1.3rem); 
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+      margin: 0.2rem 0; /* Значительно уменьшен отступ */
+      text-align: center;
+    }
+    .win {
+        color: #00ff95;
+        font-weight: bold;
+        text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+    }
+
+    .alert { 
+        font-size: clamp(0.7rem, 2.2vw, 0.85rem);
+        padding: 0.4rem;
+        margin: 0.3rem 0; /* Уменьшен отступ */
+    }
+
+    .form-section {
+        width: 100%;
+        margin: 0.3rem 0; /* Уменьшен отступ */
+    }
+
+    .input-group {
+        margin-bottom: 0.3rem; 
+    }
+    .input-group .form-control, .input-group .btn {
+        font-size: clamp(0.75rem, 2.3vw, 0.9rem); 
+        padding: 0.35rem 0.7rem; 
+    }
+    .input-group-text {
+        font-size: clamp(0.75rem, 2.3vw, 0.9rem);
+        padding: 0.35rem 0.5rem;
+    }
+
+    .btn-spin {
+      background: linear-gradient(45deg, #ff4e50, #f9d423);
+      border: none;
+      font-size: clamp(1.1rem, 3.5vw, 1.6rem); 
+      padding: 0.5rem 1.3rem; /* Уменьшен padding */
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      margin: 0.4rem 0; /* Уменьшен отступ */
+    }
+    .btn-spin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 78, 80, 0.3);
+    }
+
+    .slot-machine {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.8rem; /* Уменьшен padding */
+      border-radius: 10px;
+      margin: 0.5rem 0; /* Уменьшен отступ */
+      position: relative;
+      overflow: hidden;
+      width: 100%; 
+      max-width: 360px; /* Уменьшена макс. ширина для уменьшения высоты слотов */
+      align-self: center; 
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px; /* Уменьшен промежуток */
+      aspect-ratio: 1; 
+      width: 100%; 
+      margin: 0 auto;
+    }
+
+    .slot-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      /* Уменьшен размер шрифта символов */
+      font-size: clamp(1.8rem, 8vw, 2.8rem); 
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+     .slot-cell::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      transform: translateY(-100%);
+      transition: transform 0.3s;
+    }
+    .slot-cell:hover::before {
+      transform: translateY(100%);
+    }
+    .slot-cell.highlight {
+      animation: pulse 0.8s infinite;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .slot-symbol { position: relative; z-index: 1; }
+    .symbol-BANANA { color: #ffd700; }
+    .symbol-APPLE { color: #ff6b6b; }
+    .symbol-PLUM { color: #9775fa; }
+    .symbol-BAR { color: #15aabf; }
+    .symbol-STAR { color: #ffd43b; }
+    .symbol-7 { color: #ff0000; }
+    .symbol-WILD {
+      color: #ff00ff;
+      text-shadow: 0 0 8px #ff00ff;
+      animation: rainbow 3s linear infinite;
+    }
+    @keyframes rainbow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    .error { color: #ff5555; font-size: clamp(0.75rem, 2.3vw, 0.85rem); margin: 0.2rem 0; }
+    .valid { color: #00ff95; text-shadow: 0 0 8px rgba(0, 255, 149, 0.3); font-size: clamp(0.75rem, 2.3vw, 0.85rem); margin: 0.2rem 0; }
+
+    .form-control {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #eee;
+    }
+    .form-control:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #eee;
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+    }
+
+    .row > * {
+        padding-left: 0.4rem; /* Уменьшен padding колонок */
+        padding-right: 0.4rem;
+    }
+    .g-3 { 
+        --bs-gutter-x: 0.6rem; /* Уменьшен горизонтальный gutter */
+        --bs-gutter-y: 0.3rem; 
+    }
+    
+    .verify-form-section { /* Отдельный класс для секции верификации */
+        width: 100%;
+        margin-top: 0.5rem; /* Небольшой отступ сверху, убрали mt-auto */
+        margin-bottom: 0.1rem; /* Минимальный отступ снизу */
+    }
+
+
+    /* Особые настройки для очень маленьких экранов */
+    @media (max-height: 500px) { /* Этот медиа-запрос может быть слишком агрессивным, настройть по необходимости */
+        .game-container {
+            padding: 0.4rem;
+            justify-content: flex-start; 
+        }
+        .game-header h2 {
+            font-size: 1.1rem;
+            margin-bottom: 0.1rem;
+        }
+        .balance, .win {
+            font-size: 0.8rem;
+            margin: 0.1rem 0;
+        }
+        .btn-spin {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            margin: 0.2rem 0;
+        }
+        .slot-machine {
+            padding: 0.4rem;
+            margin: 0.2rem 0;
+            max-width: 320px; /* Еще меньше для очень низких экранов */
+        }
+        .slot-cell {
+             font-size: clamp(1.5rem, 7vw, 2.2rem);
+        }
+        .input-group .form-control, .input-group .btn, .input-group-text {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.4rem;
+        }
+        .verify-form-section {
+            margin-top: 0.3rem;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <div class="game-container">
+      <div class="game-header">
+        <h2 class="text-center">🎰 Slot Game</h2>
+      </div>
+
+      <div class="balance text-center">
+        Balance: <b>11.0</b>
+      </div>
+
+
+      <div class="form-section">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <form action="http://127.0.0.1:4567/set_bet" method="post" class="mb-0">
+              <div class="input-group">
+                <span class="input-group-text">Bet</span>
+                <input type="number" class="form-control" name="bet" min="0.01" step="0.01" value="1.0">
+                <button class="btn btn-outline-light" type="submit">Set</button>
+              </div>
+            </form>
+          </div>
+          <div class="col-sm-6">
+            <form action="http://127.0.0.1:4567/deposit" method="post" class="mb-0">
+              <div class="input-group">
+                <span class="input-group-text">Add</span>
+                <input type="number" class="form-control" name="amount" min="0.01" step="0.01" placeholder="Amount">
+                <button class="btn btn-outline-light" type="submit">Deposit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <form action="http://127.0.0.1:4567/spin" method="post" class="text-center">
+        <button type="submit" class="btn btn-spin btn-lg">
+          Spin
+        </button>
+      </form>
+
+
+        <div class="slot-machine">
+          <div class="slot-grid">
+                <div class="slot-cell ">
+                  <div class="slot-symbol symbol-7"> 
+                      <i title="Seven">7️⃣</i>
+                  </div>
+                </div>
+                <div class="slot-cell highlight">
+                  <div class="slot-symbol symbol-APPLE"> 
+                      <i title="Apple">🍎</i>
+                  </div>
+                </div>
+                <div class="slot-cell ">
+                  <div class="slot-symbol symbol-STAR"> 
+                      <i title="Star">⭐</i>
+                  </div>
+                </div>
+                <div class="slot-cell ">
+                  <div class="slot-symbol symbol-BAR"> 
+                      <i title="Bar">🍸</i>
+                  </div>
+                </div>
+                <div class="slot-cell ">
+                  <div class="slot-symbol symbol-PLUM"> 
+                      <i title="Plum">🍇</i>
+                  </div>
+                </div>
+                <div class="slot-cell highlight">
+                  <div class="slot-symbol symbol-WILD"> 
+                      <i title="Wild">🃏</i>
+                  </div>
+                </div>
+                <div class="slot-cell highlight">
+                  <div class="slot-symbol symbol-APPLE"> 
+                      <i title="Apple">🍎</i>
+                  </div>
+                </div>
+                <div class="slot-cell ">
+                  <div class="slot-symbol symbol-BANANA"> 
+                      <i title="Banana">🍌</i>
+                  </div>
+                </div>
+                <div class="slot-cell ">
+                  <div class="slot-symbol symbol-7"> 
+                      <i title="Seven">7️⃣</i>
+                  </div>
+                </div>
+          </div>
+        </div>
+
+        <div class="win text-center">
+          🎉 Win: 2.0
+        </div>
+
+        <div class="verify-form-section">
+            <form action="http://127.0.0.1:4567/verify" method="post" class="mb-0">
+              <div class="input-group">
+                <span class="input-group-text">Verify</span>
+                <input type="number" class="form-control" name="spin_index" min="0" max="0" value="0" placeholder="Spin #">
+                <button class="btn btn-outline-light" type="submit">
+                  Go
+                </button>
+              </div>
+            </form>
+        </div>
+
+    </div>
+  </div>
+
+  <script src="./index_files/bootstrap.bundle.min.js.download"></script>
+
+
+<deepl-input-controller translate="no"><template shadowrootmode="open"><link rel="stylesheet" href="chrome-extension://fancfknaplihpclbhbpclnmmjcjanbaf/build/content.css"><div dir="ltr" style="visibility: initial !important;"><div class="dl-input-translation-container svelte-95aucy"><div></div></div></div></template></deepl-input-controller></body></html>
