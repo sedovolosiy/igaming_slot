@@ -24,15 +24,15 @@ def prompt(msg)
   gets.strip
 end
 
-# Храним данные игроков: salt, client_seed, nonce
+# Store player data: salt, client_seed, nonce
 PLAYER_DATA = {}
 
-# Получить уникальную соль и client_seed для игрока
-player_name = prompt("Введите ваше имя: ")
+# Get a unique salt and client_seed for the player
+player_name = prompt("Enter your name: ")
 loop do
-  salt = prompt("Введите уникальную соль (любая строка): ")
+  salt = prompt("Enter a unique salt (any string): ")
   if PLAYER_DATA.values.any? { |data| data[:salt] == salt }
-    puts "Эта соль уже использована другим игроком. Введите другую."
+    puts "This salt is already used by another player. Enter a different one."
     next
   end
   client_seed = Digest::SHA256.hexdigest("#{player_name}:#{salt}")
@@ -41,49 +41,49 @@ loop do
 end
 
 balance = 0.0
-puts "Ваш баланс: #{balance.round(2)}"
+puts "Your balance: #{balance.round(2)}"
 loop do
-  input = prompt("Введите сумму пополнения: ")
+  input = prompt("Enter the deposit amount: ")
   add = input.to_f
   if add > 0
     balance += add
-    puts "Баланс пополнен. Текущий баланс: #{balance.round(2)}"
+    puts "Balance topped up. Current balance: #{balance.round(2)}"
     break
   else
-    puts "Сумма пополнения должна быть положительной!"
+    puts "The deposit amount must be positive!"
   end
 end
 
 bet = nil
 loop do
-  input = prompt("Введите размер ставки: ")
+  input = prompt("Enter the bet amount: ")
   bet = input.to_f
   if bet > 0 && bet <= balance
     break
   else
-    puts "Ставка должна быть положительной и не больше баланса!"
+    puts "The bet must be positive and not exceed the balance!"
   end
 end
 
 loop do
-  puts "\nВаш баланс: #{balance.round(2)} | Ваша ставка: #{bet.round(2)}"
-  puts "1. Крутить (provably fair)"
-  puts "2. Изменить ставку"
-  puts "3. Пополнить баланс"
-  puts "4. Выйти"
-  puts "5. Проверить честность спина"
-  choice = prompt("Выберите действие: ")
+  puts "\nYour balance: #{balance.round(2)} | Your bet: #{bet.round(2)}"
+  puts "1. Spin (provably fair)"
+  puts "2. Change bet"
+  puts "3. Top up balance"
+  puts "4. Exit"
+  puts "5. Verify spin fairness"
+  choice = prompt("Choose an action: ")
 
   case choice
   when '1'
     if bet > balance
-      puts "Недостаточно средств для ставки!"
+      puts "Insufficient funds for the bet!"
       next
     end
     pdata = PLAYER_DATA[player_name]
-    screen = GAME.provably_fair_spin(pdata[:client_seed], pdata[:nonce])
+    screen = GAME.provably_fair_spin(GAME.server_seed, pdata[:client_seed], pdata[:nonce])
     PLAYER_DATA[player_name][:nonce] += 1
-    # Сохраняем историю только если был совершен спин
+    # Save history only if a spin was made
     if pdata[:nonce] > 0
       pdata[:history] << {nonce: pdata[:nonce] - 1, screen: screen}
     end
@@ -92,43 +92,43 @@ loop do
     win = GAME.calculate_win(screen, bet)
     balance -= bet
     balance += win
-    puts "Вы выиграли: #{win.round(2)}"
-    puts "Ваш новый баланс: #{balance.round(2)}"
+    puts "You won: #{win.round(2)}"
+    puts "Your new balance: #{balance.round(2)}"
     if balance < bet
-      puts "Недостаточно средств для следующей ставки. Пополните баланс или измените ставку."
+      puts "Insufficient funds for the next bet. Top up your balance or change the bet."
     end
   when '2'
-    input = prompt("Введите новый размер ставки: ")
+    input = prompt("Enter the new bet amount: ")
     new_bet = input.to_f
     if new_bet > 0 && new_bet <= balance
       bet = new_bet
     else
-      puts "Ставка должна быть положительной и не больше баланса!"
+      puts "The bet must be positive and not exceed the balance!"
     end
   when '3'
-    input = prompt("Введите сумму пополнения: ")
+    input = prompt("Enter the deposit amount: ")
     add = input.to_f
     if add > 0
       balance += add
-      puts "Баланс пополнен. Текущий баланс: #{balance.round(2)}"
+      puts "Balance topped up. Current balance: #{balance.round(2)}"
     else
-      puts "Сумма пополнения должна быть положительной!"
+      puts "The deposit amount must be positive!"
     end
   when '4'
-    puts "Спасибо за игру! Ваш финальный баланс: #{balance.round(2)}"
+    puts "Thank you for playing! Your final balance: #{balance.round(2)}"
     break
   when '5'
     pdata = PLAYER_DATA[player_name]
-    print "Введите номер спина для проверки (0 - последний, 1 - предыдущий и т.д.): "
+    print "Enter the spin number to verify (0 - last, 1 - previous, etc.): "
     idx = gets.strip.to_i
     if pdata[:history] && idx < pdata[:history].size
       record = pdata[:history][-1 - idx]
       valid = GAME.verify_spin(GAME.server_seed, pdata[:client_seed], record[:nonce], record[:screen])
       puts valid ? "Spin #{record[:nonce]} is VALID (provably fair)" : "Spin #{record[:nonce]} is INVALID!"
     else
-      puts "Нет данных для проверки."
+      puts "No data available for verification."
     end
   else
-    puts "Некорректный выбор!"
+    puts "Invalid choice!"
   end
 end

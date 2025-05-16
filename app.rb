@@ -2,7 +2,7 @@
 
 require 'sinatra'
 require 'rack/session/cookie'
-require 'set' # Make sure Set is required
+require 'set' # Ensure Set is required
 
 # Global store for used salts (simplification for this example)
 # In a real app, use a database for this to ensure persistence and thread-safety if using multi-threaded servers.
@@ -79,10 +79,9 @@ post '/set_player' do
   session[:player_data] = data
   
   $used_salts.add(salt) # Add to global set
-  # session.delete(:used_salts) # Clean up old session-based salts if any existed, not strictly necessary now
 
   # Reset balance and bet for the new player
-  session[:balance] = 0.0  # Or any default starting balance you prefer
+  session[:balance] = 0.0  # Or any default starting balance
   session[:bet] = 1.0    # Default bet
 
   redirect to('/'), 303
@@ -134,7 +133,7 @@ post '/set_bet' do
 end
 
 post '/deposit' do
-  amount = params[:amount].to_f # Corrected to use params[:amount]
+  amount = params[:amount].to_f
   if amount > 0
     session[:balance] = (session[:balance] || 0.0) + amount
     session[:message] = "Deposited #{amount.round(2)}. Your new balance is #{session[:balance].round(2)}."

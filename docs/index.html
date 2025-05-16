@@ -40,15 +40,15 @@
       border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       width: 100%;
-      max-width: 420px; /* Немного уменьшил для компактности */
+      max-width: 420px; /* Slightly reduced for compactness */
       height: auto; 
       max-height: 98vh; 
-      /* Уменьшаем padding и делаем его адаптивным */
+      /* Reduce padding and make it adaptive */
       padding: clamp(0.5rem, 1.5vh, 0.8rem); 
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* Центрируем контент, если есть свободное место, вместо растягивания */
+      /* Center content if there is free space instead of stretching */
       justify-content: center; 
       overflow-y: auto; 
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
@@ -68,14 +68,14 @@
 
     .game-header h2 {
       font-size: clamp(1.4rem, 3.5vw, 2rem); 
-      margin-bottom: 0.3rem; /* Уменьшен отступ */
+      margin-bottom: 0.3rem; /* Reduced margin */
       text-align: center;
     }
 
     .balance, .win {
       font-size: clamp(0.9rem, 2.8vw, 1.3rem); 
       text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
-      margin: 0.2rem 0; /* Значительно уменьшен отступ */
+      margin: 0.2rem 0; /* Significantly reduced margin */
       text-align: center;
     }
     .win {
@@ -87,12 +87,12 @@
     .alert { 
         font-size: clamp(0.7rem, 2.2vw, 0.85rem);
         padding: 0.4rem;
-        margin: 0.3rem 0; /* Уменьшен отступ */
+        margin: 0.3rem 0; /* Reduced margin */
     }
 
     .form-section {
         width: 100%;
-        margin: 0.3rem 0; /* Уменьшен отступ */
+        margin: 0.3rem 0; /* Reduced margin */
     }
 
     .input-group {
@@ -111,12 +111,12 @@
       background: linear-gradient(45deg, #ff4e50, #f9d423);
       border: none;
       font-size: clamp(1.1rem, 3.5vw, 1.6rem); 
-      padding: 0.5rem 1.3rem; /* Уменьшен padding */
+      padding: 0.5rem 1.3rem; /* Reduced padding */
       text-transform: uppercase;
       letter-spacing: 1px;
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
       transition: all 0.3s ease;
-      margin: 0.4rem 0; /* Уменьшен отступ */
+      margin: 0.4rem 0; /* Reduced margin */
     }
     .btn-spin:hover {
       transform: translateY(-2px);
@@ -125,20 +125,20 @@
 
     .slot-machine {
       background: rgba(0, 0, 0, 0.6);
-      padding: 0.8rem; /* Уменьшен padding */
+      padding: 0.8rem; /* Reduced padding */
       border-radius: 10px;
-      margin: 0.5rem 0; /* Уменьшен отступ */
+      margin: 0.5rem 0; /* Reduced margin */
       position: relative;
       overflow: hidden;
       width: 100%; 
-      max-width: 360px; /* Уменьшена макс. ширина для уменьшения высоты слотов */
+      max-width: 360px; /* Reduced max width to decrease slot height */
       align-self: center; 
     }
 
     .slot-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px; /* Уменьшен промежуток */
+      gap: 8px; /* Reduced gap */
       aspect-ratio: 1; 
       width: 100%; 
       margin: 0 auto;
@@ -151,7 +151,7 @@
       justify-content: center;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 8px;
-      /* Уменьшен размер шрифта символов */
+      /* Reduced font size of symbols */
       font-size: clamp(1.8rem, 8vw, 2.8rem); 
       position: relative;
       overflow: hidden;
@@ -212,22 +212,22 @@
     }
 
     .row > * {
-        padding-left: 0.4rem; /* Уменьшен padding колонок */
+        padding-left: 0.4rem; /* Reduced column padding */
         padding-right: 0.4rem;
     }
     .g-3 { 
-        --bs-gutter-x: 0.6rem; /* Уменьшен горизонтальный gutter */
+        --bs-gutter-x: 0.6rem; /* Reduced horizontal gutter */
         --bs-gutter-y: 0.3rem; 
     }
     
-    .verify-form-section { /* Отдельный класс для секции верификации */
+    .verify-form-section { /* Separate class for verification section */
         width: 100%;
         margin-top: 0.5rem; /* Небольшой отступ сверху, убрали mt-auto */
         margin-bottom: 0.1rem; /* Минимальный отступ снизу */
     }
 
 
-    /* Особые настройки для очень маленьких экранов */
+    /* Special settings for very small screens */
     @media (max-height: 500px) { /* Этот медиа-запрос может быть слишком агрессивным, настройть по необходимости */
         .game-container {
             padding: 0.4rem;
