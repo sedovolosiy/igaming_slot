@@ -13,24 +13,25 @@
       padding: 0;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #eee;
-      overflow: hidden; 
+      overflow: auto; /* Changed from hidden to auto */
       font-size: 14px; 
     }
 
     body {
       display: flex;
-      align-items: center;
+      align-items: flex-start; /* Changed from center to flex-start */
       justify-content: center; 
     }
 
     .game-wrapper { 
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start; /* Changed from center to flex-start */
         width: 100%;
         height: 100%;
         padding: 1vh 1vw; 
         box-sizing: border-box;
+        overflow-y: auto; /* Added to make game-wrapper scrollable */
     }
 
     .game-container {
@@ -39,18 +40,17 @@
       border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       width: 100%;
-      max-width: 420px; /* Немного уменьшил для компактности */
+      max-width: 420px; 
       height: auto; 
-      max-height: 98vh; 
-      /* Уменьшаем padding и делаем его адаптивным */
+      /* max-height: 98vh; Removed */
       padding: clamp(0.5rem, 1.5vh, 0.8rem); 
       display: flex;
       flex-direction: column;
-      align-items: center;
-      /* Центрируем контент, если есть свободное место, вместо растягивания */
-      justify-content: center; 
-      overflow-y: auto; 
+      align-items: center; 
+      justify-content: flex-start; /* Changed from center to flex-start */
+      overflow-y: visible; /* Changed from auto to visible */
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      /* box-sizing: border-box; Already present, keep it */
     }
 
     @media (min-width: 700px) and (min-height: 600px) {
@@ -124,20 +124,20 @@
 
     .slot-machine {
       background: rgba(0, 0, 0, 0.6);
-      padding: 0.8rem; /* Уменьшен padding */
+      padding: 0.5rem; /* Was 0.8rem */
       border-radius: 10px;
-      margin: 0.5rem 0; /* Уменьшен отступ */
+      margin: 0.3rem 0; /* Was 0.5rem 0 */
       position: relative;
       overflow: hidden;
       width: 100%; 
-      max-width: 360px; /* Уменьшена макс. ширина для уменьшения высоты слотов */
+      max-width: 320px; /* Was 360px */
       align-self: center; 
     }
 
     .slot-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px; /* Уменьшен промежуток */
+      gap: 5px; /* Was 8px */
       aspect-ratio: 1; 
       width: 100%; 
       margin: 0 auto;
@@ -267,91 +267,107 @@
   <div class="game-wrapper">
     <div class="game-container">
       <div class="game-header">
-        <h2 class="text-center">🎰 Slot Game</h2>
+        <h2>Welcome, <%= CGI.escapeHTML(@player_name.to_s) %>!</h2>
+        <p class="balance">Balance: <%= @balance.round(2) %></p>
       </div>
 
-      <div class="balance text-center">
-        Balance: <b><%= @balance.round(2) %></b>
-      </div>
+      <% if @message %>
+        <div class="alert alert-info" role="alert">
+          <%= CGI.escapeHTML(@message.to_s) %>
+        </div>
+      <% end %>
 
       <% if @require_deposit %>
-        <div class="alert alert-danger text-center">
-          Balance is zero. Please deposit funds.
+        <div class="alert alert-warning" role="alert">
+          Your balance is zero. Please deposit funds to play.
         </div>
       <% end %>
 
       <div class="form-section">
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <form action="/set_bet" method="post" class="mb-0">
-              <div class="input-group">
-                <span class="input-group-text">Bet</span>
-                <input type="number" class="form-control" name="bet" min="0.01" step="0.01" value="<%= @bet %>" <%= @require_deposit ? 'disabled' : '' %>>
-                <button class="btn btn-outline-light" type="submit" <%= @require_deposit ? 'disabled' : '' %>>Set</button>
-              </div>
-            </form>
-          </div>
-          <div class="col-sm-6">
-            <form action="/deposit" method="post" class="mb-0">
-              <div class="input-group">
-                <span class="input-group-text">Add</span>
-                <input type="number" class="form-control" name="amount" min="0.01" step="0.01" placeholder="Amount">
-                <button class="btn btn-outline-light" type="submit">Deposit</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <form action="/set_bet" method="post" class="input-group mb-2">
+          <span class="input-group-text">Bet:</span>
+          <input type="number" name="bet" value="<%= @bet %>" step="0.01" min="0.01" class="form-control" required>
+          <button type="submit" class="btn btn-outline-light">Set Bet</button>
+        </form>
+
+        <form action="/deposit" method="post" class="input-group mb-3">
+          <span class="input-group-text">Deposit:</span>
+          <input type="number" name="amount" placeholder="Amount" step="0.01" min="0.01" class="form-control" required>
+          <button type="submit" class="btn btn-outline-success">Deposit</button>
+        </form>
       </div>
 
-      <form action="/spin" method="post" class="text-center">
-        <button type="submit" class="btn btn-spin btn-lg" <%= @require_deposit ? 'disabled' : '' %>>
-          Spin
-        </button>
+      <form action="/spin" method="post" class="d-grid gap-2 mb-3">
+        <button type="submit" class="btn btn-spin btn-lg">Spin!</button>
       </form>
-
-      <% if @message %>
-        <%= @message %> 
+      
+      <%# Display last spin result %>
+      <% if @last_screen_rows %>
+        <div class="slot-machine mb-3">
+          <div class="slot-grid">
+            <% @last_screen_rows.each_with_index do |row, r_idx| %>
+              <% row.each_with_index do |symbol, c_idx| %>
+                <% is_winning = (@last_winning_cells || []).any? { |cell| cell[:row] == r_idx && cell[:col] == c_idx } %>
+                <div class="slot-cell <%= 'highlight' if is_winning %>">
+                  <span class="slot-symbol symbol-<%= symbol.to_s.upcase %>">
+                    <%=
+                      case symbol.to_s.upcase
+                      when "APPLE" then "🍎"
+                      when "BANANA" then "🍌"
+                      when "PLUM" then "🍇"
+                      when "BAR" then "🍸"
+                      when "STAR" then "⭐"
+                      when "7" then "7️⃣"
+                      when "WILD" then "🃏"
+                      else CGI.escapeHTML(symbol.to_s)
+                      end
+                    %>
+                  </span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        <%# Button to verify the last spin %>
+        <% if @can_verify_last_spin %>
+          <form action="/verify_last_spin" method="post" class="d-grid gap-2 mb-3">
+            <button type="submit" class="btn btn-info btn-sm">Verify Last Spin (Nonce: <%= session[:last_spin_to_verify][:nonce] %>)</button>
+          </form>
+        <% end %>
+      <% else %>
+        <p class="text-center my-3">Spin to start the game!</p>
       <% end %>
 
-      <% if @screen_rows %>
-        <div class="slot-machine">
+      <%# Display verified spin result %>
+      <% if @verified_screen_rows %>
+        <hr>
+        <h4 class="mt-3 text-center">Verified Spin Result</h4>
+        <div class="provably-fair-info text-center small mt-2 mb-2">
+          <p>Nonce: <%= CGI.escapeHTML(@verified_nonce.to_s) %></p>
+          <p>Client Seed Hash: <br><code style="font-size: 0.8em; word-break: break-all;"><%= CGI.escapeHTML(@verified_client_seed_hash.to_s) %></code></p>
+          <p>Server Seed (revealed): <br><code style="font-size: 0.8em; word-break: break-all;"><%= CGI.escapeHTML(@verified_server_seed.to_s) %></code></p>
+          <p>Server Seed Hash: <br><code style="font-size: 0.8em; word-break: break-all;"><%= CGI.escapeHTML(@verified_server_seed_hash.to_s) %></code></p>
+        </div>
+        <div class="slot-machine mb-3">
           <div class="slot-grid">
-            <% @screen_rows.each_with_index do |row, r_idx| %>
+            <% @verified_screen_rows.each_with_index do |row, r_idx| %>
               <% row.each_with_index do |symbol, c_idx| %>
-                <%
-                  is_winning = false
-                  if session[:winning_cells] 
-                    session[:winning_cells].each do |win_data|
-                      win_row_idx = win_data[0] 
-                      win_col_idx = win_data[1] 
-                      if win_row_idx == r_idx && win_col_idx == c_idx
-                        is_winning = true
-                        break
+                <% is_winning_verified = (@verified_winning_cells || []).any? { |cell| cell[:row] == r_idx && cell[:col] == c_idx } %>
+                <div class="slot-cell <%= 'highlight' if is_winning_verified %>">
+                  <span class="slot-symbol symbol-<%= symbol.to_s.upcase %>">
+                    <%=
+                      case symbol.to_s.upcase
+                      when "APPLE" then "🍎"
+                      when "BANANA" then "🍌"
+                      when "PLUM" then "🍇"
+                      when "BAR" then "🍸"
+                      when "STAR" then "⭐"
+                      when "7" then "7️⃣"
+                      when "WILD" then "🃏"
+                      else CGI.escapeHTML(symbol.to_s)
                       end
-                    end
-                  end
-                %>
-                <div class="slot-cell <%= 'highlight' if is_winning %>">
-                  <div class="slot-symbol symbol-<%= symbol.to_s.upcase %>"> 
-                    <% case symbol.to_s.upcase 
-                       when 'BANANA' %>
-                      <i title="Banana">🍌</i>
-                    <% when 'APPLE' %>
-                      <i title="Apple">🍎</i>
-                    <% when 'PLUM' %>
-                      <i title="Plum">🍇</i>
-                    <% when 'BAR' %>
-                      <i title="Bar">🍸</i>
-                    <% when 'STAR' %>
-                      <i title="Star">⭐</i>
-                    <% when '7' %>
-                      <i title="Seven">7️⃣</i>
-                    <% when 'WILD' %>
-                      <i title="Wild">🃏</i>
-                    <% else %>
-                      <%= symbol %>
-                    <% end %>
-                  </div>
+                    %>
+                  </span>
                 </div>
               <% end %>
             <% end %>
@@ -359,30 +375,8 @@
         </div>
       <% end %>
 
-      <% if @win && @win > 0 %>
-        <div class="win text-center">
-          🎉 Win: <%= @win.round(2) %>
-        </div>
-      <% end %>
-
-      <% if defined?(player_data) && player_data.is_a?(Hash) && player_data[:history] && player_data[:history].any? %>
-        <div class="verify-form-section">
-            <form action="/verify" method="post" class="mb-0">
-              <div class="input-group">
-                <span class="input-group-text">Verify</span>
-                <input type="number" class="form-control" name="spin_index" min="0"
-                       max="<%= player_data[:history].size - 1 %>" value="0"
-                       placeholder="Spin #">
-                <button class="btn btn-outline-light" type="submit">
-                  Go
-                </button>
-              </div>
-            </form>
-        </div>
-      <% end %>
-
-    </div>
-  </div>
+    </div> <%# End game-container %>
+  </div> <%# End game-wrapper %>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
