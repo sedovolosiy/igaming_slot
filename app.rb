@@ -1,5 +1,9 @@
 # frozen_string_literal: true
+
 require 'sinatra'
+set :port, ENV.fetch('PORT') { 4567 }
+set :bind, '0.0.0.0'
+
 require_relative 'slot'
 require_relative 'visual_printer'
 require 'digest'
